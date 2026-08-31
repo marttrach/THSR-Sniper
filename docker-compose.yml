@@ -88,7 +88,7 @@ services:
       - PMA_PORT=3306
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in Portainer}
     ports:
-      - "8080:80"
+      - "48181:80"
     networks:
       - default
     depends_on:
@@ -137,7 +137,7 @@ services:
     pull_policy: build
     container_name: thsr-sniper-frontend
     ports:
-      - "3000:80"
+      - "43123:80"
     restart: unless-stopped
     networks:
       - default
