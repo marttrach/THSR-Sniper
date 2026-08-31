@@ -24,7 +24,7 @@ services:
     pull_policy: build
     container_name: thsr-sniper-scheduler
     volumes:
-      - data:/app/data
+      - /mnt/NEW_PA9A1_2T/Truenas_App/THSR/data:/app/data
     environment:
       - PYTHONUNBUFFERED=1
       - TERM=xterm-256color
@@ -40,9 +40,9 @@ services:
     pull_policy: build
     container_name: thsr-sniper-api
     ports:
-      - "8000:48000"
+      - "48000:8000"
     volumes:
-      - data:/app/data
+      - /mnt/NEW_PA9A1_2T/Truenas_App/THSR/data:/app/data
     environment:
       - PYTHONUNBUFFERED=1
       - THSR_API_MODE=1
@@ -65,7 +65,7 @@ services:
       - MYSQL_USER=${MYSQL_USER:-thsr}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD:?Set MYSQL_PASSWORD in Portainer}
     volumes:
-      - mysql_data:/var/lib/mysql
+      - /mnt/NEW_PA9A1_2T/Truenas_App/THSR/mySQL:/var/lib/mysql
     networks:
       - default
     restart: unless-stopped
@@ -104,9 +104,9 @@ services:
     env_file:
       - stack.env
     ports:
-      - "8001:48001"
+      - "48001:8001"
     volumes:
-      - data:/app/data
+      - /mnt/NEW_PA9A1_2T/Truenas_App/THSR/data:/app/data
     environment:
       - PYTHONUNBUFFERED=1
       - SECRET_KEY=${SECRET_KEY:?Set SECRET_KEY in Portainer}
@@ -144,12 +144,6 @@ services:
     depends_on:
       - thsr-sniper-api
       - thsr-sniper-auth
-
-volumes:
-  data:
-    driver: local
-  mysql_data:
-    driver: local
 
 networks:
   default:

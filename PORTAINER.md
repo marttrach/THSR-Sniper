@@ -59,9 +59,19 @@ images, and recreates the changed containers.
 The default host ports are:
 
 - `3000`: frontend (the recommended application entry point)
-- `8000`: booking API
-- `8001`: authentication API
+- `48000`: booking API (container port `8000`)
+- `48001`: authentication API (container port `8001`)
 - `8080`: phpMyAdmin
 
 MySQL is intentionally not published on the host. Other services access it as
 `mysql:3306` through the internal Compose network.
+
+Application state is persisted with TrueNAS host bind mounts:
+
+```text
+/mnt/NEW_PA9A1_2T/Truenas_App/THSR/data  -> /app/data
+/mnt/NEW_PA9A1_2T/Truenas_App/THSR/mySQL -> /var/lib/mysql
+```
+
+Create both host directories before deploying and ensure the container users
+can write to them.
