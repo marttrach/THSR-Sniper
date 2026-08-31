@@ -4,7 +4,6 @@
 ![Stars](https://img.shields.io/github/stars/SeanChangX/THSR-Sniper)
 ![Release](https://img.shields.io/github/v/release/SeanChangX/THSR-Sniper)
 ![Downloads](https://img.shields.io/github/downloads/SeanChangX/THSR-Sniper/total)
-![Docker Pulls](https://img.shields.io/docker/pulls/seanchangx/thsr-sniper?logo=docker&logoColor=white&label=seanchangx%2Fthsr-sniper)
 ![License](https://img.shields.io/github/license/SeanChangX/THSR-Sniper)
 
 # THSR-Sniper
@@ -37,9 +36,11 @@
 
 ### Using Docker (Recommended)
 
+To deploy this fork directly from GitHub with Portainer, see the [Portainer deployment guide](PORTAINER.md).
+
 ```bash
 # Clone the repository
-git clone https://github.com/SeanChangX/THSR-Sniper.git
+git clone https://github.com/marttrach/THSR-Sniper.git
 cd THSR-Sniper
 ```
 
@@ -71,13 +72,13 @@ cat env.example | grep -A 4 "MySQL Database" >> .env
 Or manually edit `.env` and add these lines:
 ```env
 # MySQL Database Configuration
-MYSQL_ROOT_PASSWORD=thsr_sniper_root
+MYSQL_ROOT_PASSWORD=<replace-with-a-strong-root-password>
 MYSQL_DATABASE=thsr_sniper
-MYSQL_USER=user
-MYSQL_PASSWORD=password
+MYSQL_USER=thsr
+MYSQL_PASSWORD=<replace-with-a-strong-password>
 ```
 
-Default MySQL settings will be used if not specified. For production environments, it is recommended to change the passwords.
+The MySQL root and application passwords are required. Never commit production credentials to Git.
 
 #### 3. Frontend Configuration (Optional)
 

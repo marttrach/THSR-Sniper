@@ -4,7 +4,6 @@
 ![Stars](https://img.shields.io/github/stars/SeanChangX/THSR-Sniper)
 ![Release](https://img.shields.io/github/v/release/SeanChangX/THSR-Sniper)
 ![Downloads](https://img.shields.io/github/downloads/SeanChangX/THSR-Sniper/total)
-![Docker Pulls](https://img.shields.io/docker/pulls/seanchangx/thsr-sniper?logo=docker&logoColor=white&label=seanchangx%2Fthsr-sniper)
 ![License](https://img.shields.io/github/license/SeanChangX/THSR-Sniper)
 
 # THSR-Sniper
@@ -37,9 +36,11 @@
 
 ### 使用 Docker（建議）
 
+若要由 Portainer 直接連接此 fork 的 GitHub repository 部署，請參閱 [Portainer 部署指南](PORTAINER.md)。
+
 ```bash
 # 下載專案
-git clone https://github.com/SeanChangX/THSR-Sniper.git
+git clone https://github.com/marttrach/THSR-Sniper.git
 cd THSR-Sniper
 ```
 
@@ -71,13 +72,13 @@ cat env.example | grep -A 4 "MySQL Database" >> .env
 或直接手動編輯 `.env` 加入以下內容：
 ```env
 # MySQL Database Configuration
-MYSQL_ROOT_PASSWORD=thsr_sniper_root
+MYSQL_ROOT_PASSWORD=<請換成高強度 root 密碼>
 MYSQL_DATABASE=thsr_sniper
-MYSQL_USER=user
-MYSQL_PASSWORD=password
+MYSQL_USER=thsr
+MYSQL_PASSWORD=<請換成高強度密碼>
 ```
 
-若未設定將使用預設值。正式環境建議更改密碼。
+MySQL root 與應用程式密碼為必填值，請勿將正式環境密碼提交至 Git。
 
 #### 3. 前端設定（選用）
 

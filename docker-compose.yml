@@ -2,7 +2,8 @@ services:
   # Original CLI service for interactive usage
   thsr-sniper:
     build: .
-    image: seanchangx/thsr-sniper:latest
+    image: marttrach/thsr-sniper:latest
+    pull_policy: build
     container_name: thsr-sniper
     environment:
       - PYTHONUNBUFFERED=1
@@ -19,7 +20,8 @@ services:
   # Background scheduler service
   thsr-sniper-scheduler:
     build: .
-    image: seanchangx/thsr-sniper:latest
+    image: marttrach/thsr-sniper:latest
+    pull_policy: build
     container_name: thsr-sniper-scheduler
     volumes:
       - data:/app/data
@@ -34,7 +36,8 @@ services:
   # THSR Booking API service
   thsr-sniper-api:
     build: .
-    image: seanchangx/thsr-sniper:latest
+    image: marttrach/thsr-sniper:latest
+    pull_policy: build
     container_name: thsr-sniper-api
     ports:
       - "8000:8000"
@@ -54,21 +57,21 @@ services:
   mysql:
     image: mysql:8.0
     container_name: thsr-sniper-mysql
+    env_file:
+      - stack.env
     environment:
-      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-thsr_sniper_root}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in Portainer}
       - MYSQL_DATABASE=${MYSQL_DATABASE:-thsr_sniper}
-      - MYSQL_USER=${MYSQL_USER:-user}
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-password}
+      - MYSQL_USER=${MYSQL_USER:-thsr}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:?Set MYSQL_PASSWORD in Portainer}
     volumes:
       - mysql_data:/var/lib/mysql
-    ports:
-      - "3306:3306"
     networks:
       - default
     restart: unless-stopped
     command: --default-authentication-plugin=mysql_native_password
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-thsr_sniper_root}"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -78,10 +81,12 @@ services:
   phpmyadmin:
     image: phpmyadmin/phpmyadmin:latest
     container_name: thsr-sniper-phpmyadmin
+    env_file:
+      - stack.env
     environment:
       - PMA_HOST=mysql
       - PMA_PORT=3306
-      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-thsr_sniper_root}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in Portainer}
     ports:
       - "8080:80"
     networks:
@@ -93,21 +98,24 @@ services:
   # Authentication service
   thsr-sniper-auth:
     build: ./auth_service
-    image: seanchangx/thsr-sniper-auth:latest
+    image: marttrach/thsr-sniper-auth:latest
+    pull_policy: build
     container_name: thsr-sniper-auth
+    env_file:
+      - stack.env
     ports:
       - "8001:8001"
     volumes:
       - data:/app/data
     environment:
       - PYTHONUNBUFFERED=1
-      - SECRET_KEY=${SECRET_KEY}
-      - ENCRYPTION_KEY=${ENCRYPTION_KEY}
+      - SECRET_KEY=${SECRET_KEY:?Set SECRET_KEY in Portainer}
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY:?Set ENCRYPTION_KEY in Portainer}
       - MYSQL_HOST=mysql
       - MYSQL_PORT=3306
       - MYSQL_DATABASE=${MYSQL_DATABASE:-thsr_sniper}
-      - MYSQL_USER=${MYSQL_USER:-user}
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-password}
+      - MYSQL_USER=${MYSQL_USER:-thsr}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:?Set MYSQL_PASSWORD in Portainer}
     restart: unless-stopped
     command: python auth_api.py
     networks:
@@ -125,13 +133,11 @@ services:
   # React frontend
   thsr-sniper-frontend:
     build: ./frontend
-    image: seanchangx/thsr-sniper-frontend:latest
+    image: marttrach/thsr-sniper-frontend:latest
+    pull_policy: build
     container_name: thsr-sniper-frontend
     ports:
       - "3000:80"
-    environment:
-      - VITE_API_URL=http://localhost:8000
-      - VITE_AUTH_URL=http://localhost:8001
     restart: unless-stopped
     networks:
       - default

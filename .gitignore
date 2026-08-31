@@ -12,3 +12,4 @@
 thsr_ocr/datasets/20250825
 
 *.env
+!stack.env
