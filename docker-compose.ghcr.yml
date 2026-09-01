@@ -1,0 +1,133 @@
+services:
+  # Original CLI service for interactive usage
+  thsr-sniper:
+    image: ghcr.io/marttrach/thsr-sniper:latest
+    container_name: thsr-sniper
+    environment:
+      - PYTHONUNBUFFERED=1
+      - TERM=xterm-256color
+      - THSR_FORCE_INTERACTIVE=1
+    stdin_open: true
+    tty: true
+    command: bash
+    restart: unless-stopped
+    networks:
+      - default
+
+  # Background scheduler service
+  thsr-sniper-scheduler:
+    image: ghcr.io/marttrach/thsr-sniper:latest
+    container_name: thsr-sniper-scheduler
+    volumes:
+      - /mnt/NEW_PA9A1_2T/Truenas_App/THSR/data:/app/data
+    environment:
+      - PYTHONUNBUFFERED=1
+      - TERM=xterm-256color
+    restart: unless-stopped
+    command: python watchdog.py
+    networks:
+      - default
+
+  # THSR Booking API service
+  thsr-sniper-api:
+    image: ghcr.io/marttrach/thsr-sniper:latest
+    container_name: thsr-sniper-api
+    ports:
+      - "48000:8000"
+    volumes:
+      - /mnt/NEW_PA9A1_2T/Truenas_App/THSR/data:/app/data
+    environment:
+      - PYTHONUNBUFFERED=1
+      - THSR_API_MODE=1
+    restart: unless-stopped
+    command: python main.py --start-api --api-host 0.0.0.0 --api-port 8000
+    networks:
+      - default
+    depends_on:
+      - thsr-sniper-scheduler
+
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: thsr-sniper-mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in Portainer}
+      - MYSQL_DATABASE=${MYSQL_DATABASE:-thsr_sniper}
+      - MYSQL_USER=${MYSQL_USER:-thsr}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:?Set MYSQL_PASSWORD in Portainer}
+    volumes:
+      - /mnt/NEW_PA9A1_2T/Truenas_App/THSR/mySQL:/var/lib/mysql
+    networks:
+      - default
+    restart: unless-stopped
+    command: --default-authentication-plugin=mysql_native_password
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # phpMyAdmin
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: thsr-sniper-phpmyadmin
+    environment:
+      - PMA_HOST=mysql
+      - PMA_PORT=3306
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in Portainer}
+    ports:
+      - "48181:80"
+    networks:
+      - default
+    depends_on:
+      - mysql
+    restart: unless-stopped
+
+  # Authentication service
+  thsr-sniper-auth:
+    image: ghcr.io/marttrach/thsr-sniper-auth:latest
+    container_name: thsr-sniper-auth
+    ports:
+      - "48001:8001"
+    volumes:
+      - /mnt/NEW_PA9A1_2T/Truenas_App/THSR/data:/app/data
+    environment:
+      - PYTHONUNBUFFERED=1
+      - SECRET_KEY=${SECRET_KEY:?Set SECRET_KEY in Portainer}
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY:?Set ENCRYPTION_KEY in Portainer}
+      - MYSQL_HOST=mysql
+      - MYSQL_PORT=3306
+      - MYSQL_DATABASE=${MYSQL_DATABASE:-thsr_sniper}
+      - MYSQL_USER=${MYSQL_USER:-thsr}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:?Set MYSQL_PASSWORD in Portainer}
+    restart: unless-stopped
+    command: python auth_api.py
+    networks:
+      - default
+    depends_on:
+      mysql:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # React frontend
+  thsr-sniper-frontend:
+    image: ghcr.io/marttrach/thsr-sniper-frontend:latest
+    container_name: thsr-sniper-frontend
+    ports:
+      - "43123:80"
+    restart: unless-stopped
+    networks:
+      - default
+    depends_on:
+      - thsr-sniper-api
+      - thsr-sniper-auth
+
+networks:
+  default:
+    driver: bridge
