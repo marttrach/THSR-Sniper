@@ -1,15 +1,12 @@
 services:
   # Original CLI service for interactive usage
   thsr-sniper:
-    build: .
-    image: marttrach/thsr-sniper:latest
-    pull_policy: build
+    image: ghcr.io/marttrach/thsr-sniper:latest
     container_name: thsr-sniper
     environment:
       - PYTHONUNBUFFERED=1
-      - DISPLAY=${DISPLAY:-:0}
       - TERM=xterm-256color
-      - THSR_FORCE_INTERACTIVE=1  # Force interactive mode for pure CLI usage
+      - THSR_FORCE_INTERACTIVE=1
     stdin_open: true
     tty: true
     command: bash
@@ -19,9 +16,7 @@ services:
 
   # Background scheduler service
   thsr-sniper-scheduler:
-    build: .
-    image: marttrach/thsr-sniper:latest
-    pull_policy: build
+    image: ghcr.io/marttrach/thsr-sniper:latest
     container_name: thsr-sniper-scheduler
     volumes:
       - /mnt/NEW_PA9A1_2T/Truenas_App/THSR/data:/app/data
@@ -35,9 +30,7 @@ services:
 
   # THSR Booking API service
   thsr-sniper-api:
-    build: .
-    image: marttrach/thsr-sniper:latest
-    pull_policy: build
+    image: ghcr.io/marttrach/thsr-sniper:latest
     container_name: thsr-sniper-api
     ports:
       - "48000:8000"
@@ -57,8 +50,6 @@ services:
   mysql:
     image: mysql:8.0
     container_name: thsr-sniper-mysql
-    env_file:
-      - stack.env
     environment:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in Portainer}
       - MYSQL_DATABASE=${MYSQL_DATABASE:-thsr_sniper}
@@ -81,8 +72,6 @@ services:
   phpmyadmin:
     image: phpmyadmin/phpmyadmin:latest
     container_name: thsr-sniper-phpmyadmin
-    env_file:
-      - stack.env
     environment:
       - PMA_HOST=mysql
       - PMA_PORT=3306
@@ -97,12 +86,8 @@ services:
 
   # Authentication service
   thsr-sniper-auth:
-    build: ./auth_service
-    image: marttrach/thsr-sniper-auth:latest
-    pull_policy: build
+    image: ghcr.io/marttrach/thsr-sniper-auth:latest
     container_name: thsr-sniper-auth
-    env_file:
-      - stack.env
     ports:
       - "48001:8001"
     volumes:
@@ -132,9 +117,7 @@ services:
 
   # React frontend
   thsr-sniper-frontend:
-    build: ./frontend
-    image: marttrach/thsr-sniper-frontend:latest
-    pull_policy: build
+    image: ghcr.io/marttrach/thsr-sniper-frontend:latest
     container_name: thsr-sniper-frontend
     ports:
       - "43123:80"
